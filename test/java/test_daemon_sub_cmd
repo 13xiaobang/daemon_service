@@ -1,0 +1,4 @@
+#!/system/bin/sh
+base=/system
+export CLASSPATH=$base/framework/testdaemonsubcmd.jar:$base/framework/daemon.sub.jar
+exec app_process $base/bin test.daemon.sub.commands.TestDaemonSubCmd "$@"
