@@ -4,7 +4,9 @@ include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES:= \
 	IDaemonSubManagerService.cpp \
-	DaemonSubManagerService.cpp
+	DaemonSubManagerService.cpp \
+        ICallback.cpp
+
 
 LOCAL_SHARED_LIBRARIES := \
 	libcutils \

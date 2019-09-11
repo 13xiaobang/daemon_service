@@ -13,6 +13,7 @@ static jint native_getEvent(JNIEnv *env, jobject thiz);
 
 static jint native_enquiry(JNIEnv *env, jobject thiz);
 static jint native_open(JNIEnv *env, jobject thiz);
+static jint native_reg_callback(JNIEnv *env, jobject thiz);
 static jint native_close(JNIEnv *env, jobject thiz);
 //static jbyteArray native_read(JNIEnv *env, jobject);
 static jint native_read(JNIEnv *env, jobject, jbyteArray javaAudioData, jint sizeInBytes);
@@ -31,6 +32,7 @@ static JNINativeMethod daemon_sub_manager_method_table[] = {
     {"read", "([BI)I", (void*)native_read},
     {"write", "([BI)I", (void*)native_write},
     {"block", "()I", (void*)native_block},
+    {"reg_callback", "()I", (void*)native_reg_callback},
 };
 
 #ifdef __cplusplus

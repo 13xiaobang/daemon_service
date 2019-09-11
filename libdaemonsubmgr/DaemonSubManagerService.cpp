@@ -31,6 +31,11 @@ namespace android {
     {
         ALOGI("setCmd: %d", mode);
         global_cmd = mode;
+        if(mCallback != NULL) {
+            mCallback->notifyCallback(mode+1);
+        }
+            else
+            ALOGI("noting to callback");
         return 0;
     }
 
@@ -74,6 +79,13 @@ namespace android {
     {
         ALOGI("DaemonSubManagerService::write called");
         ALOGI("DaemonSubManagerService::write %s, len = %d", *str, *size );
+        return 0;
+    }
+
+    status_t DaemonSubManagerService::setCallback(const sp<ICallback>& callback)
+    {
+        ALOGD("DaemonSubManagerService::setCallback\n");
+        mCallback = callback;
         return 0;
     }
 

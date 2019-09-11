@@ -6,7 +6,7 @@
 #include <utils/Errors.h>
 #include <utils/Log.h>
 #include <libdaemonsubmgr/IDaemonSubManagerService.h>
-
+#include "ICallback.h"
 namespace android{
 class DaemonSubManagerService: public BnDaemonSubService
 {
@@ -26,7 +26,8 @@ public:
 private:
                         DaemonSubManagerService();
     virtual             ~DaemonSubManagerService();
-    
+    virtual int setCallback(const sp<ICallback>& callback);
+    sp<ICallback> mCallback;
 };
 
 };

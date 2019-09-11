@@ -28,6 +28,7 @@ public class TestDaemonSubCmd extends BaseCommand {
 				onShowUsage(System.err);
 				return;
 			}
+			DaemonSubManager.getInstance().reg_callback();
 			DaemonSubManager.getInstance().setCmd(Integer.parseInt(id));
 			System.out.println("TestDaemonSubCmd: setCmd: " + Integer.parseInt(id));
 		}
@@ -38,19 +39,19 @@ public class TestDaemonSubCmd extends BaseCommand {
 		}
 		else if(op.equals("read"))
 		{
-		     byte[] str_byte = new byte[100];
-		     DaemonSubManager.getInstance().read(str_byte, 100);
-		     System.out.println("TestDaemonSubCmd: getStr: " + new String(str_byte));
+			byte[] str_byte = new byte[100];
+			DaemonSubManager.getInstance().read(str_byte, 100);
+			System.out.println("TestDaemonSubCmd: getStr: " + new String(str_byte));
 		}
-                else if(op.equals("write"))
+		else if(op.equals("write"))
 		{
-		     byte[] str_byte = "write something".getBytes();
-		     DaemonSubManager.getInstance().write(str_byte, 100);
+			byte[] str_byte = "write something".getBytes();
+			DaemonSubManager.getInstance().write(str_byte, 100);
 		}
-                else if(op.equals("open"))
+		else if(op.equals("open"))
 		{
-		     TSM.open();
-                     TSM.block();
+			TSM.open();
+			TSM.block();
 		}
 		else {
 			showError("Error: unknow command '" + op + "'");

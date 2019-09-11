@@ -18,7 +18,8 @@ namespace android {
         OPEN,
         CLOSE,
         READ,
-        WRITE
+        WRITE,
+        SET_CALLBACK
     };
 
     class BpDaemonSubManagerService: public BpInterface<IDaemonSubManagerService>
@@ -102,6 +103,12 @@ namespace android {
 
                 blob.release();
                 return status;
+            }
+            virtual int setCallback(const sp<ICallback>& callback) {
+                Parcel data, reply;
+                data.writeStrongBinder(callback->asBinder());// TODO: important
+                remote()->transact(SET_CALLBACK, data, &reply);
+                return reply.readInt32();
             }
             virtual void register_cmd_callback(void (*cmd_cb)(int cmd)) {};
             virtual void sendEvent(int event) {};
@@ -189,6 +196,12 @@ namespace android {
                             blob.release();
                             reply->writeInt32(write(&str, &write_size));
                             free(str);
+                            return NO_ERROR;
+                        }
+            case SET_CALLBACK: {
+                            ALOGD("BnXXXXService::onTransact SET_CALLBACK ");
+                            sp<ICallback> callback = interface_cast<ICallback>(data.readStrongBinder());// TODO: important!
+                            reply->writeInt32(setCallback(callback));
                             return NO_ERROR;
                         }
             default:

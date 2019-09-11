@@ -12,15 +12,59 @@
 #include <sys/types.h>
 #include <binder/IServiceManager.h>
 #include "daemon_sub_DaemonSubManager.h"
+#include "Callback.h"
+
 using namespace android;
 
 #include <libdaemonsubmgr/DaemonSubManagerService.h>
+
+JavaVM *g_VM;
+jobject g_obj;
+
+int mNeedDetach = JNI_FALSE;
+jmethodID javaCallbackId;
+JNIEnv *g_env;
+
 const sp<IDaemonSubManagerService> getDaemonSubManagerService()
 {
     sp<IServiceManager> sm = defaultServiceManager();
     sp<IBinder> binder = sm->getService(String16("daemonsub.manager"));
 
     return interface_cast<IDaemonSubManagerService>(binder);
+}
+
+int Callback::notifyCallback(int event) {
+    ALOGD("Callback::notifyCallback, value: %d", event);
+
+    mNeedDetach = JNI_FALSE;
+    int getEnvStat = g_VM->GetEnv((void **) &g_env,JNI_VERSION_1_6);
+    if (getEnvStat == JNI_EDETACHED) {
+        if ((*g_VM).AttachCurrentThread(&g_env, NULL) != 0) {
+            return 1;
+        }
+        mNeedDetach = JNI_TRUE;
+    }
+
+    jclass javaClass = (*g_env).GetObjectClass(g_obj);
+    if (javaClass == 0) {
+        ALOGE("Unable to find class");
+        (*g_VM).DetachCurrentThread();
+        return 1;
+    }
+
+    javaCallbackId = (*g_env).GetMethodID(javaClass,
+                                                 "onServiceCallback", "(I)V");
+    if (javaCallbackId == NULL) {
+        ALOGE("Unable to find method:onCallback");
+        return 1;
+    }
+    (*g_env).CallIntMethod(g_obj, javaCallbackId, event);
+
+    if(mNeedDetach) {
+        (*g_VM).DetachCurrentThread();
+    }
+    g_env = NULL;
+    return 0;
 }
 
 static jint native_setCmd(JNIEnv *, jobject,jint mode)
@@ -54,12 +98,6 @@ static jint native_enquiry(JNIEnv *, jobject)
     jint status =  getDaemonSubManagerService()->enquiry();
     return status;
 }
-JavaVM *g_VM;
-jobject g_obj;
-
-int mNeedDetach = JNI_FALSE;
-jmethodID javaCallbackId;
-JNIEnv *g_env;
 
 #define JNIREG_CLASS "daemon/sub/DaemonSubManager"
 
@@ -106,14 +144,14 @@ void * DaemonThread(void* param)
     ALOGI("start DaemonThread");
     while(1) {
         usleep(2000000);
-        daemon_callback("this is callback");
+        daemon_callback("this is local callback");
     }
     return (void*)NULL;
 }
+
 static jint native_open(JNIEnv * env, jobject thiz)
 {
-    jint status =  getDaemonSubManagerService()->open();
-
+    getDaemonSubManagerService()->open();
     env->GetJavaVM(&g_VM);
     g_obj = env->NewGlobalRef(thiz);
 
@@ -132,6 +170,21 @@ static jint native_close(JNIEnv *, jobject)
     jint status =  getDaemonSubManagerService()->close();
     return status;
 }
+
+static jint native_reg_callback(JNIEnv * env, jobject thiz)
+{
+    env->GetJavaVM(&g_VM);
+    g_obj = env->NewGlobalRef(thiz);
+    sp<IDaemonSubManagerService> spp = getDaemonSubManagerService();
+    if(spp == NULL) {
+        ALOGE("native_reg_callback failed\n");
+        return -1;
+    }
+    sp<Callback> c = new Callback();
+    spp->setCallback(c);
+    return 0;
+}
+
 
 static jint native_block(JNIEnv *, jobject)
 {

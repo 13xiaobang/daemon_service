@@ -32,11 +32,16 @@ public class DaemonSubManager{
 	public native int read(byte[] javaAudioData, int sizeInBytes); // return read size.
 	public native int close();
 	public native int write(byte[] javaAudioData, int sizeInBytes);
-        public native int block(); 
-        public int onProgressCallBack(byte[] bytes, int len) {
-            String str = new String(bytes);
-            System.out.println("str:"+str);
-            System.out.println("len:"+len);
-            return 0;
-            }
+    public native int block();
+    public native int reg_callback();
+    public int onProgressCallBack(byte[] bytes, int len) {
+        String str = new String(bytes);
+        System.out.println("str:"+str);
+        System.out.println("len:"+len);
+        return 0;
+    }
+
+    public void onServiceCallback(int event) {
+        System.out.println("onServiceCallback: "+ event);
+    }
 }

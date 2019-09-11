@@ -5,7 +5,7 @@
 #include <utils/RefBase.h>
 #include <binder/IInterface.h>
 #include <binder/Parcel.h>
-
+#include "ICallback.h"
 namespace android {
 class IDaemonSubManagerService: public IInterface
 {
@@ -21,6 +21,7 @@ public:
     virtual status_t    close() = 0;
     virtual status_t    read(char **str, int32_t *size) = 0;
     virtual status_t    write(char **str, int32_t *size) = 0;
+    virtual int setCallback(const sp<ICallback>& callback)=0;
 };
 
 // ----------------------------------------------------------------------------
